@@ -18,7 +18,6 @@ class HomeViewModel(private val repository: TodoRepository) : ViewModel() {
     val isLoading: LiveData<Boolean> get() = _isLoading
 
     init {
-        // Set initial value of isLoading to false
         _isLoading.value = false
     }
 

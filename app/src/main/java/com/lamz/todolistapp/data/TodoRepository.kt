@@ -4,17 +4,16 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
 import com.lamz.todolistapp.utils.Utils
 
 class TodoRepository {
 
-    private val database: DatabaseReference = FirebaseDatabase.getInstance("https://todolist-app-e056a-default-rtdb.firebaseio.com").getReference("todo")
+    private val database: DatabaseReference = Utils.firebaseDatabase.getReference(Utils.TODO)
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    suspend fun getTodoList(callback: (ArrayList<TodoItem>) -> Unit) {
+    fun getTodoList(callback: (ArrayList<TodoItem>) -> Unit) {
         val currentUser = auth.currentUser
         val uid = currentUser?.uid
 
@@ -41,12 +40,12 @@ class TodoRepository {
         })
     }
 
-    suspend fun getCompleteTodoList(callback: (ArrayList<TodoItem>) -> Unit) {
+    fun getCompleteTodoList(callback: (ArrayList<TodoItem>) -> Unit) {
         val currentUser = auth.currentUser
         val uid = currentUser?.uid
         val uidCompleted = "${uid}_yes"
 
-        val query: Query = database.orderByChild("uid_completed").equalTo(uidCompleted)
+        val query: Query = database.orderByChild(Utils.UID_COMPLETED).equalTo(uidCompleted)
 
         query.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {

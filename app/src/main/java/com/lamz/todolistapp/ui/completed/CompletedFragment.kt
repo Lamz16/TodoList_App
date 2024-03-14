@@ -9,19 +9,19 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import com.lamz.todolistapp.DetailActivity
 import com.lamz.todolistapp.R
 import com.lamz.todolistapp.TodoAdapter
 import com.lamz.todolistapp.data.TodoItem
 import com.lamz.todolistapp.databinding.FragmentCompletedBinding
+import com.lamz.todolistapp.utils.Utils
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CompletedFragment : Fragment() {
 
     private lateinit var binding: FragmentCompletedBinding
     private lateinit var auth: FirebaseAuth
-    private val completedViewModel : CompletedViewModel by viewModel()
+    private val completedViewModel: CompletedViewModel by viewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,14 +41,14 @@ class CompletedFragment : Fragment() {
         binding.text1.setTextColor(colorTeks)
 
         completedViewModel.fetchTodoList()
-        completedViewModel.todoList.observe(viewLifecycleOwner){
+        completedViewModel.todoList.observe(viewLifecycleOwner) {
             updateUI(it)
         }
 
         val loadingProgressBar = binding.loadingProgressBar
 
         completedViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            // Atur visibilitas ProgressBar berdasarkan status loading
+
             loadingProgressBar?.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
 
@@ -59,13 +59,13 @@ class CompletedFragment : Fragment() {
     }
 
     private fun updateUI(todoList: ArrayList<TodoItem>) {
-        // Membuat atau memperbarui adapter RecyclerView
+
         val adapter = TodoAdapter(todoList)
 
-        // Mengatur adapter ke RecyclerView
+
         binding.rvTodo.adapter = adapter
 
-        // Menambahkan listener untuk meng-handle item yang diklik
+
         adapter.setOnItemClickListener(object : TodoAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
                 val clickedItem = todoList[position]
@@ -77,10 +77,12 @@ class CompletedFragment : Fragment() {
             override fun onCheckboxChanged(position: Int, isChecked: Boolean) {
                 val uidCompleted = FirebaseAuth.getInstance().currentUser?.uid
                 val clickedItem = todoList[position]
-                val todoRef = FirebaseDatabase.getInstance("https://todolist-app-e056a-default-rtdb.firebaseio.com").getReference("todo").child(clickedItem.todoId)
-                todoRef.child("completed").setValue(if (isChecked) "yes" else "no")
-                todoRef.child("uid_completed").setValue(if (isChecked) "${uidCompleted}_yes" else "")
-                todoRef.child("status").setValue(if (isChecked) "Complete" else "Incomplete")
+                val todoRef =
+                    Utils.firebaseDatabase.getReference(Utils.TODO).child(clickedItem.todoId)
+                todoRef.child(Utils.COMPLETED).setValue(if (isChecked) "yes" else "no")
+                todoRef.child(Utils.UID_COMPLETED)
+                    .setValue(if (isChecked) "${uidCompleted}_yes" else "")
+                todoRef.child(Utils.STATUS).setValue(if (isChecked) "Complete" else "Incomplete")
             }
         })
     }

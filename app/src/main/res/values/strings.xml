@@ -18,7 +18,7 @@
     <string name="save">Save</string>
     <string name="search">Search</string>
     <string name="titleDetail">TODODODODO</string>
-    <string name="welcome_back_main">welcome back, %s</string>
+    <string name="welcome_back_main">Welcome back, %s</string>
     <string name="all_todocompleted">All the to-dos you\'ve completed</string>
     <string name="default_web_client_id">none</string>
     <string name="logout">Sign Out</string>

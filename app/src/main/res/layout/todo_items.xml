@@ -7,7 +7,8 @@
     android:backgroundTint="@color/color_1"
     app:cardCornerRadius="12dp"
     app:cardElevation="20dp"
-    app:contentPadding="4dp" >
+    app:contentPadding="4dp"
+    android:foreground="?attr/selectableItemBackground">
     
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -47,6 +48,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_margin="16dp"
+            android:foreground="?attr/selectableItemBackground"
             android:button="@drawable/checkbox_style"
             android:buttonTint="@color/black"
             />
