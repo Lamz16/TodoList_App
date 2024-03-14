@@ -42,7 +42,14 @@ class CompletedFragment : Fragment() {
 
         completedViewModel.fetchTodoList()
         completedViewModel.todoList.observe(viewLifecycleOwner) {
-            updateUI(it)
+            if (it.isNotEmpty()){
+                updateUI(it)
+                val emptyBanner = binding.emptyBanner.root
+                emptyBanner.visibility = View.INVISIBLE
+            }else{
+                val emptyBanner = binding.emptyBanner.root
+                emptyBanner.visibility = View.VISIBLE
+            }
         }
 
         val loadingProgressBar = binding.loadingProgressBar

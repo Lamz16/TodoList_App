@@ -12,8 +12,6 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
 import com.lamz.todolistapp.data.model.MainViewModel
 import com.lamz.todolistapp.databinding.ActivityMainBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -21,8 +19,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var database: DatabaseReference
-    var auth = FirebaseAuth.getInstance()
     private val mainViewModel: MainViewModel by viewModel()
 
 
@@ -89,5 +85,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
 
 }

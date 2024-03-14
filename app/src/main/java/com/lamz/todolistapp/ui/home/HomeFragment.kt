@@ -88,7 +88,15 @@ class HomeFragment : Fragment() {
         homeViewModel.fetchTodoList()
 
         homeViewModel.todoList.observe(viewLifecycleOwner) { todoList ->
-            updateUI(todoList)
+            if (todoList.isNotEmpty()){
+                updateUI(todoList)
+                val emptyBanner = binding.emptyBanner.root
+                emptyBanner.visibility = View.INVISIBLE
+            }else{
+                val emptyBanner = binding.emptyBanner.root
+                emptyBanner.visibility = View.VISIBLE
+            }
+
 
             searchEditText.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(

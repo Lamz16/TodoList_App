@@ -24,4 +24,5 @@
     <string name="logout">Sign Out</string>
     <string name="date">Date : %s</string>
     <string name="status">Status : %s</string>
+    <string name="data_is_empty">Todo is Empty</string>
 </resources>

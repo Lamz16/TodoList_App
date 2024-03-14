@@ -19,6 +19,7 @@ import com.google.firebase.database.ValueEventListener
 import com.lamz.todolistapp.data.InputTodo
 import com.lamz.todolistapp.data.TodoItem
 import com.lamz.todolistapp.databinding.ActivityDetailBinding
+import com.lamz.todolistapp.ui.home.HomeFragment
 import com.lamz.todolistapp.utils.Utils
 
 class DetailActivity : AppCompatActivity() {
@@ -99,7 +100,7 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun updateTodo(todo : String, detail : String,status : String?, isComplete : String?,uidCompleted : String?, finish : AlertDialog){
-        database = FirebaseDatabase.getInstance("https://todolist-app-e056a-default-rtdb.firebaseio.com").getReference("todo")
+        database = Utils.firebaseDatabase.getReference(Utils.TODO)
         val taskId = database.push().key!!
         val uid = auth.currentUser?.uid
         val currentTime = Utils.getCurrentTimeWithFormat()
@@ -121,6 +122,9 @@ class DetailActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 Toast.makeText(this, "Todo deleted successfully", Toast.LENGTH_SHORT).show()
                 setResult(Activity.RESULT_OK)
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
                 finish()
             }
             .addOnFailureListener { e ->
