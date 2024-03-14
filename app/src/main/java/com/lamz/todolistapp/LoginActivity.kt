@@ -97,11 +97,13 @@ class LoginActivity : AppCompatActivity() {
 
     private fun loginAuth() {
         with(binding) {
-            val email = emailInput.text.toString().trim()
-            val password = passwordInput.text.toString().trim()
+            val email = emailInput.text
+            val password = passwordInput.text
 
             btnLogin.setOnClickListener {
-                if (email.isNotEmpty() && password.isNotEmpty()) {
+                if (email.toString().trim().isNotEmpty() && password.toString().trim().isNotEmpty()) {
+                    Log.d(TAG, "Inputan email: $email")
+                    Log.d(TAG, "Inputan password: $password")
                     auth.signInWithEmailAndPassword(email.toString(), password.toString())
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {

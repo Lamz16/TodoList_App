@@ -139,12 +139,12 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun registerAuth(){
         with(binding){
-            val name = nameInput.text.toString().trim()
-            val email = emailInput.text.toString().trim()
-            val password = passwordInput.text.toString().trim()
+            val name = nameInput.text
+            val email = emailInput.text
+            val password = passwordInput.text
 
             btnRegis.setOnClickListener {
-                if (email.isNotEmpty() && password.isNotEmpty()){
+                if (email.toString().trim().isNotEmpty() && password.toString().trim().isNotEmpty()){
                     auth.createUserWithEmailAndPassword(email.toString() , password.toString())
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful){
