@@ -20,7 +20,6 @@ import com.google.firebase.database.ValueEventListener
 import com.lamz.todolistapp.data.InputTodo
 import com.lamz.todolistapp.data.TodoItem
 import com.lamz.todolistapp.databinding.ActivityDetailBinding
-import com.lamz.todolistapp.ui.home.HomeFragment
 import com.lamz.todolistapp.utils.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,10 +39,7 @@ class DetailActivity : AppCompatActivity() {
         binding.container.setBackgroundColor(color)
         todoId = intent.getStringExtra(toodoId) ?: ""
         lifecycleScope.launch(Dispatchers.IO) {
-            database =
-                FirebaseDatabase.getInstance("https://todolist-app-e056a-default-rtdb.firebaseio.com")
-                    .getReference("todo")
-
+            database = Utils.firebaseDatabaseTodo
             val taskRef = database.child(todoId)
             taskRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -58,7 +54,13 @@ class DetailActivity : AppCompatActivity() {
                                 finish()
                             }
                             bannerDetail.btnEdit.setOnClickListener {
-                                showAlertDialog(todo?.title, todo?.detail, todo?.status, todo?.completed, todo?.uid_completed)
+                                showAlertDialog(
+                                    todo?.title,
+                                    todo?.detail,
+                                    todo?.status,
+                                    todo?.completed,
+                                    todo?.uid_completed
+                                )
                             }
 
                             btnDelete.setOnClickListener {
@@ -78,7 +80,13 @@ class DetailActivity : AppCompatActivity() {
 
     }
 
-    private fun showAlertDialog(title : String? , detail : String?, status : String?, isComplete : String?,uidCompleted : String?) {
+    private fun showAlertDialog(
+        title: String?,
+        detail: String?,
+        status: String?,
+        isComplete: String?,
+        uidCompleted: String?
+    ) {
         val builder = AlertDialog.Builder(this)
         val inflater = layoutInflater
         val dialogView = inflater.inflate(R.layout.alert_dialog, null)
@@ -99,22 +107,46 @@ class DetailActivity : AppCompatActivity() {
             dialog.dismiss()
         }
         save.setOnClickListener {
-            updateTodo(todo.text.toString(), detailTodo.text.toString(),status, isComplete, uidCompleted,dialog )
+            updateTodo(
+                todo.text.toString(),
+                detailTodo.text.toString(),
+                status,
+                isComplete,
+                uidCompleted,
+                dialog
+            )
         }
     }
 
-    private fun updateTodo(todo : String, detail : String,status : String?, isComplete : String?,uidCompleted : String?, finish : AlertDialog){
+    private fun updateTodo(
+        todo: String,
+        detail: String,
+        status: String?,
+        isComplete: String?,
+        uidCompleted: String?,
+        finish: AlertDialog
+    ) {
         lifecycleScope.launch(Dispatchers.IO) {
-            database = Utils.firebaseDatabase.getReference(Utils.TODO)
+            database = Utils.firebaseDatabaseTodo
             val taskId = database.push().key!!
             val uid = auth.currentUser?.uid
             val currentTime = Utils.getCurrentTimeWithFormat()
-            val updateTask = InputTodo(taskId,uid!!,todo, detail, time = currentTime, status = status!!, isCompleted = isComplete!!, uid_completed = uidCompleted!!)
+            val updateTask = InputTodo(
+                taskId,
+                uid!!,
+                todo,
+                detail,
+                time = currentTime,
+                status = status!!,
+                isCompleted = isComplete!!,
+                uid_completed = uidCompleted!!
+            )
 
             val dbRef = database.child(todoId)
             dbRef.setValue(updateTask)
                 .addOnSuccessListener {
-                    Toast.makeText(this@DetailActivity, "Succes Update Todo", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@DetailActivity, "Succes Update Todo", Toast.LENGTH_SHORT)
+                        .show()
                     finish.dismiss()
                     finish()
                 }
@@ -127,7 +159,11 @@ class DetailActivity : AppCompatActivity() {
             val todoRef = database.child(todoId)
             todoRef.removeValue()
                 .addOnSuccessListener {
-                    Toast.makeText(this@DetailActivity, "Todo deleted successfully", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@DetailActivity,
+                        "Todo deleted successfully",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     setResult(Activity.RESULT_OK)
                     val intent = Intent(this@DetailActivity, MainActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
@@ -135,7 +171,11 @@ class DetailActivity : AppCompatActivity() {
                     finish()
                 }
                 .addOnFailureListener { e ->
-                    Toast.makeText(this@DetailActivity, "Failed to delete todo: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@DetailActivity,
+                        "Failed to delete todo: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
         }
 

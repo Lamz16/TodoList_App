@@ -10,7 +10,7 @@ import com.lamz.todolistapp.utils.Utils
 
 class TodoRepository {
 
-    private val database: DatabaseReference = Utils.firebaseDatabase.getReference(Utils.TODO)
+    private val database: DatabaseReference = Utils.firebaseDatabaseTodo
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     fun getTodoList(callback: (ArrayList<TodoItem>) -> Unit) {

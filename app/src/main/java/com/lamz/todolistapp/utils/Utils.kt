@@ -12,7 +12,7 @@ object Utils {
         return dateFormat.format(currentTime)
     }
 
-    val firebaseDatabase = FirebaseDatabase.getInstance("https://todolist-app-e056a-default-rtdb.firebaseio.com")
+    val firebaseDatabaseTodo = FirebaseDatabase.getInstance("https://todolist-app-e056a-default-rtdb.firebaseio.com").getReference("todo")
     const val COMPLETED = "completed"
     const val UID_COMPLETED = "uid_completed"
     const val STATUS = "status"
