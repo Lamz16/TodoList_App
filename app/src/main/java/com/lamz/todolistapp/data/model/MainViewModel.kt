@@ -11,7 +11,6 @@ class MainViewModel(private val repository: TodoRepository): ViewModel() {
     private val _createTodoSuccess = MutableLiveData<Boolean>()
     val createTodoSuccess: LiveData<Boolean> get() = _createTodoSuccess
 
-    // Fungsi untuk membuat todo baru
     fun createTodo(todo: String, detail: String) {
         viewModelScope.launch{
             try {

@@ -84,7 +84,7 @@ class CompletedFragment : Fragment() {
                 val uidCompleted = FirebaseAuth.getInstance().currentUser?.uid
                 val clickedItem = todoList[position]
                 val todoRef =
-                    Utils.firebaseDatabase.getReference(Utils.TODO).child(clickedItem.todoId)
+                    Utils.firebaseDatabaseTodo.child(clickedItem.todoId)
                 todoRef.child(Utils.COMPLETED).setValue(if (isChecked) "yes" else "no")
                 todoRef.child(Utils.UID_COMPLETED)
                     .setValue(if (isChecked) "${uidCompleted}_yes" else "")

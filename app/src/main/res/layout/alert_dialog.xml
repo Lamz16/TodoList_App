@@ -31,6 +31,7 @@
             android:id="@+id/title_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:saveEnabled="true"
             android:background="@drawable/dynamic_line"
             android:hint="@string/title" />
 
@@ -38,6 +39,7 @@
             android:id="@+id/task_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:saveEnabled="true"
             android:layout_marginTop="16dp"
             android:background="@drawable/dynamic_line"
             android:hint="@string/task" />

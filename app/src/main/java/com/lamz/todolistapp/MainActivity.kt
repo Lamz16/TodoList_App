@@ -2,44 +2,49 @@ package com.lamz.todolistapp
 
 import android.graphics.Color
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.lamz.todolistapp.data.model.MainViewModel
 import com.lamz.todolistapp.databinding.ActivityMainBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.lamz.todolistapp.databinding.AlertDialogBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var alertDialogBinding: AlertDialogBinding
     private val mainViewModel: MainViewModel by viewModel()
-
+    private var isDialogShown = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        alertDialogBinding = AlertDialogBinding.inflate(layoutInflater)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        if (savedInstanceState != null) {
+            isDialogShown = savedInstanceState.getBoolean("isDialogShown", false)
+        }
+
+        if (isDialogShown) {
+            showAlertDialog()
+        }
+
+
         val navView: BottomNavigationView = binding.navView
 
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
         val navController = navHostFragment.navController
         navView.setBackgroundColor(Color.TRANSPARENT)
 
 
-        val indexes = listOf(1,2)
+        val indexes = listOf(1, 2)
         indexes.forEach { index ->
             navView.menu.getItem(index).isEnabled = false
         }
@@ -51,35 +56,57 @@ class MainActivity : AppCompatActivity() {
             showAlertDialog()
         }
 
+
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("isDialogShown", isDialogShown)
+        val todoInput = alertDialogBinding.titleInput.text.toString()
+        val detailInput = alertDialogBinding.taskInput.text.toString()
+        outState.putString("todoInput", todoInput)
+        outState.putString("detailInput", detailInput)
+
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        val saveTitle = savedInstanceState.getString("todoInput")
+        val saveDetail = savedInstanceState.getString("detailInput")
+        alertDialogBinding.titleInput.setText(saveTitle)
+        alertDialogBinding.taskInput.setText(saveDetail)
     }
 
     private fun showAlertDialog() {
+        isDialogShown = true
         val builder = AlertDialog.Builder(this)
-        val inflater = layoutInflater
-        val dialogView = inflater.inflate(R.layout.alert_dialog, null)
+        val view = alertDialogBinding.root
+        alertDialogBinding.apply {
+            val todo = titleInput
+            val detail = taskInput
 
 
-        val todo = dialogView.findViewById<EditText>(R.id.title_input)
-        val detail = dialogView.findViewById<EditText>(R.id.task_input)
-        val cancel = dialogView.findViewById<ImageView>(R.id.cancel)
-        val save = dialogView.findViewById<Button>(R.id.btnSave)
+            builder.setView(view)
+            val dialog = builder.create()
+            dialog.window?.setBackgroundDrawableResource(R.drawable.alert_dialog_bg)
+            dialog.show()
 
+            cancel.setOnClickListener {
+                dialog.dismiss()
+            }
 
-        builder.setView(dialogView)
-        val dialog = builder.create()
-        dialog.window?.setBackgroundDrawableResource(R.drawable.alert_dialog_bg)
-        dialog.show()
-        cancel.setOnClickListener {
-            dialog.dismiss()
+            btnSave.setOnClickListener {
+                val currentTodoTitle = todo.text.toString()
+                val currentTodoDetail = detail.text.toString()
+                createTodo(currentTodoTitle, currentTodoDetail, dialog)
+            }
         }
-        save.setOnClickListener {
-            createTodo(todo.text.toString(), detail.text.toString(), dialog)
-        }
+
     }
 
-    private fun createTodo(todo : String, detail : String, dialog : AlertDialog){
-        mainViewModel.createTodo(todo,detail)
-        mainViewModel.createTodoSuccess.observe(this){ success ->
+    private fun createTodo(todo: String, detail: String, dialog: AlertDialog) {
+        mainViewModel.createTodo(todo, detail)
+        mainViewModel.createTodoSuccess.observe(this) { success ->
             if (success) {
                 Toast.makeText(this, "Success Create Task", Toast.LENGTH_SHORT).show()
                 dialog.dismiss()

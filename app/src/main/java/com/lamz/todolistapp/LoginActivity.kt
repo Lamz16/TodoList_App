@@ -50,10 +50,9 @@ class LoginActivity : AppCompatActivity() {
         mBitmap = Bitmap.createBitmap(screenWidth, 500, Bitmap.Config.ARGB_8888)
         mCanvas = Canvas(mBitmap)
 
-        val colorBack = ContextCompat.getColor(this, R.color.color_2)
         val colorTeks = ContextCompat.getColor(this, R.color.white)
         with(binding) {
-            container.setBackgroundColor(colorBack)
+
             sayWelcome.setTextColor(colorTeks)
             orSign.setTextColor(colorTeks)
             canvas.setImageBitmap(mBitmap)
