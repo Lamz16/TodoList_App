@@ -56,7 +56,7 @@ class CompletedFragment : Fragment() {
 
         completedViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
 
-            loadingProgressBar?.visibility = if (isLoading) View.VISIBLE else View.GONE
+            loadingProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
 
         binding.rvTodo.apply {

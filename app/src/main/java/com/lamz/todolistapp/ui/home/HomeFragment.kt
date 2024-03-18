@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -23,6 +24,9 @@ import com.lamz.todolistapp.data.TodoItem
 import com.lamz.todolistapp.data.TodoRepository
 import com.lamz.todolistapp.databinding.FragmentHomeBinding
 import com.lamz.todolistapp.utils.Utils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class HomeFragment : Fragment() {
@@ -139,11 +143,15 @@ class HomeFragment : Fragment() {
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.menu1 -> {
-                    googleSignInClient.signOut()
-                    auth.signOut()
-                    val intent = Intent(requireContext(), LoginActivity::class.java)
-                    startActivity(intent)
-                    requireActivity().finish()
+                    lifecycleScope.launch(Dispatchers.IO){
+                        googleSignInClient.signOut()
+                        auth.signOut()
+                        withContext(Dispatchers.Main){
+                            val intent = Intent(requireContext(), LoginActivity::class.java)
+                            startActivity(intent)
+                            requireActivity().finish()
+                        }
+                    }
                     true
                 }
 

@@ -12,15 +12,23 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.lamz.todolistapp.databinding.ActivityRegisterBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
@@ -44,7 +52,7 @@ class RegisterActivity : AppCompatActivity() {
 
         val colorBack = ContextCompat.getColor(this, R.color.color_2)
         val colorTeks = ContextCompat.getColor(this, R.color.white)
-        with(binding){
+        with(binding) {
             container.setBackgroundColor(colorBack)
             leStart.setTextColor(colorTeks)
             orSign.setTextColor(colorTeks)
@@ -64,7 +72,9 @@ class RegisterActivity : AppCompatActivity() {
             }
 
             signGoogle.setOnClickListener {
-                signInWithGoogle()
+                lifecycleScope.launch(Dispatchers.IO) {
+                    signInWithGoogle()
+                }
             }
         }
         drawRectangle()
@@ -74,7 +84,7 @@ class RegisterActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         val currentUser = auth.currentUser
-        if (currentUser != null){
+        if (currentUser != null) {
             reload()
         }
     }
@@ -92,6 +102,7 @@ class RegisterActivity : AppCompatActivity() {
         mCanvas.drawRect(left, top, right, bottom, mPaint)
 
     }
+
     private fun signInWithGoogle() {
 
         val gso = GoogleSignInOptions
@@ -114,7 +125,7 @@ class RegisterActivity : AppCompatActivity() {
                 val account = task.getResult(ApiException::class.java)!!
                 firebaseAuthWithGoogle(account.idToken!!)
             } catch (e: ApiException) {
-                // Google Sign In failed, update UI appropriately
+
                 Log.w(LoginActivity.TAG, "Google sign in failed", e)
             }
         }
@@ -125,63 +136,80 @@ class RegisterActivity : AppCompatActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
-                    Log.d(LoginActivity.TAG, "signInWithCredential:success")
+
                     val user = auth.currentUser
                     updateUI(user)
                 } else {
-                    // If sign in fails, display a message to the user.
-                    Log.w(LoginActivity.TAG, "signInWithCredential:failure", task.exception)
+
                     updateUI(null)
                 }
             }
     }
 
-    private fun registerAuth(){
-        with(binding){
+    private fun registerAuth() {
+        with(binding) {
             val name = nameInput.text
             val email = emailInput.text
             val password = passwordInput.text
 
             btnRegis.setOnClickListener {
-                if (email.toString().trim().isNotEmpty() && password.toString().trim().isNotEmpty()){
-                    auth.createUserWithEmailAndPassword(email.toString() , password.toString())
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful){
-                                val user = auth.currentUser
-                                val updateProfile = userProfileChangeRequest {
-                                    displayName = name.toString()
-                                }
-                                user!!.updateProfile(updateProfile)
-                                    .addOnCompleteListener{profileTask ->
-                                    if(profileTask.isSuccessful){
-                                        Toast.makeText(baseContext, "Welcome ${name.toString()}", Toast.LENGTH_SHORT).show()
-                                        updateUI(user)
+                if (email.toString().trim().isNotEmpty() && password.toString().trim()
+                        .isNotEmpty()
+                ) {
+
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        auth.createUserWithEmailAndPassword(
+                            email.toString(),
+                            password.toString()
+                        )
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    val user = auth.currentUser
+                                    val updateProfile = userProfileChangeRequest {
+                                        displayName = name.toString()
+                                    }
+                                    val timeDelay = 300L
+                                    user!!.updateProfile(updateProfile)
+                                        .addOnCompleteListener { profileTask ->
+                                            if (profileTask.isSuccessful) {
+                                                Toast.makeText(
+                                                    baseContext,
+                                                    "Welcome ${name.toString()}",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                lifecycleScope.launch(Dispatchers.Main) {
+                                                    delay(timeDelay)
+                                                    updateUI(user)
+                                                }
+                                            }
+                                        }
+                                } else {
+                                    try {
+                                        throw task.exception!!
+                                    } catch (e: FirebaseAuthUserCollisionException) {
+                                        showToast("Users with the same email are already registered")
+                                    } catch (e: FirebaseAuthWeakPasswordException) {
+                                        showToast("Password must be more than 6 characters")
+                                    } catch (e: FirebaseException) {
+                                        showToast("Incorrect email and password")
+                                    } catch (e: Exception) {
+                                        showToast("${e.message}")
                                     }
                                 }
-                            }else{
-                                Log.d("Register", "createUserWithEmail:failure", task.exception)
-                                Toast.makeText(
-                                    baseContext,
-                                    "${task.exception}",
-                                    Toast.LENGTH_SHORT,
-                                ).show()
                             }
-                        }
-                }else{
-                    Toast.makeText(baseContext, "You must fill name, email and password", Toast.LENGTH_SHORT).show()
+
+                    }
+
+                } else {
+                    showToast("You must fill name, email and password")
                 }
             }
         }
     }
 
-    private fun updateUI(user : FirebaseUser?){
+    private fun updateUI(user: FirebaseUser?) {
         if (user != null) {
-            Toast.makeText(
-                baseContext,
-                "Welcome back, ${user.displayName}",
-                Toast.LENGTH_SHORT
-            ).show()
+            showToast("Welcome back, ${user.displayName}")
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
@@ -189,20 +217,24 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun reload() {
-        auth.currentUser?.reload()?.addOnCompleteListener(this) { task ->
-            if (task.isSuccessful) {
-                // Reload berhasil
-                val user = auth.currentUser
-                updateUI(user)
-            } else {
-                Toast.makeText(
-                    baseContext,
-                    "${task.exception}",
-                    Toast.LENGTH_SHORT
-                ).show()
-                updateUI(null)
+        lifecycleScope.launch(Dispatchers.IO) {
+            auth.currentUser?.reload()?.addOnCompleteListener(this@RegisterActivity) { task ->
+                if (task.isSuccessful) {
+
+                    val user = auth.currentUser
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        updateUI(user)
+                    }
+                } else {
+                    showToast("${task.exception}")
+                }
             }
         }
+
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(baseContext, message, Toast.LENGTH_SHORT).show()
     }
 
     companion object {

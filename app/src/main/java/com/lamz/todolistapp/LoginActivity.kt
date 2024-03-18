@@ -12,14 +12,22 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.lamz.todolistapp.databinding.ActivityLoginBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -27,7 +35,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var mCanvas: Canvas
     private val mPaint = Paint()
 
-    var auth = FirebaseAuth.getInstance()
+    private var auth = FirebaseAuth.getInstance()
     private lateinit var googleSignInClient: GoogleSignInClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,11 +59,6 @@ class LoginActivity : AppCompatActivity() {
             canvas.setImageBitmap(mBitmap)
             toSignUp.setTextColor(colorTeks)
 
-            btnLogin.setOnClickListener {
-                val intent = Intent(this@LoginActivity, MainActivity::class.java)
-                startActivity(intent)
-                finish()
-            }
 
             toSignUp.setOnClickListener {
                 val intent = Intent(this@LoginActivity, RegisterActivity::class.java)
@@ -63,7 +66,10 @@ class LoginActivity : AppCompatActivity() {
                 finish()
             }
             signGoogle.setOnClickListener {
-                signInWithGoogle()
+                lifecycleScope.launch(Dispatchers.IO) {
+                    signInWithGoogle()
+                }
+
             }
 
         }
@@ -94,31 +100,42 @@ class LoginActivity : AppCompatActivity() {
     }
 
 
-
     private fun loginAuth() {
-        with(binding) {
+        binding.apply{
             val email = emailInput.text
             val password = passwordInput.text
 
             btnLogin.setOnClickListener {
-                if (email.toString().trim().isNotEmpty() && password.toString().trim().isNotEmpty()) {
+
+                if (email.toString().trim().isNotEmpty() && password.toString().trim()
+                        .isNotEmpty()
+                ) {
                     Log.d(TAG, "Inputan email: $email")
                     Log.d(TAG, "Inputan password: $password")
-                    auth.signInWithEmailAndPassword(email.toString(), password.toString())
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                val user = auth.currentUser
-                                updateUI(user)
-                            } else {
-                                Toast.makeText(
-                                    baseContext,
-                                    "${task.exception}",
-                                    Toast.LENGTH_SHORT,
-                                ).show()
+
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        auth.signInWithEmailAndPassword(email.toString(), password.toString())
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    val user = auth.currentUser
+                                    val timeDelay = 300L
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        delay(timeDelay)
+                                        updateUI(user)
+                                    }
+                                } else {
+                                    try {
+                                        throw task.exception!!
+                                    }catch (e : FirebaseException){
+                                        showToast("Incorrect email and password")
+                                    }catch (e : Exception){
+                                        showToast("${e.message}")
+                                    }
+                                }
                             }
-                        }
-                }else{
-                    Toast.makeText(baseContext, "You must fill email and password", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                   showToast("You must fill email and password")
                 }
             }
         }
@@ -133,7 +150,6 @@ class LoginActivity : AppCompatActivity() {
                 val account = task.getResult(ApiException::class.java)!!
                 firebaseAuthWithGoogle(account.idToken!!)
             } catch (e: ApiException) {
-                // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e)
             }
         }
@@ -144,13 +160,12 @@ class LoginActivity : AppCompatActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
-                    Log.d(TAG, "signInWithCredential:success")
+
                     val user = auth.currentUser
-                    updateUI(user)
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        updateUI(user)
+                    }
                 } else {
-                    // If sign in fails, display a message to the user.
-                    Log.w(TAG, "signInWithCredential:failure", task.exception)
                     updateUI(null)
                 }
             }
@@ -161,7 +176,7 @@ class LoginActivity : AppCompatActivity() {
         if (user != null) {
             Toast.makeText(
                 baseContext,
-                "Welcome back, ${user.email}",
+                "Welcome back, ${user.displayName}",
                 Toast.LENGTH_SHORT
             ).show()
             val intent = Intent(this, MainActivity::class.java)
@@ -182,6 +197,10 @@ class LoginActivity : AppCompatActivity() {
 
         mCanvas.drawRect(left, top, right, bottom, mPaint)
 
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(baseContext, message, Toast.LENGTH_SHORT).show()
     }
 
     companion object {
