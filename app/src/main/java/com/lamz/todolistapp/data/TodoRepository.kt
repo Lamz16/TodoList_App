@@ -68,7 +68,7 @@ class TodoRepository {
         })
     }
 
-    suspend fun createTodo(todo: String, detail: String) {
+    fun createTodo(todo: String, detail: String) {
         val taskId = database.push().key!!
         val uid = auth.currentUser?.uid
         val currentTime = Utils.getCurrentTimeWithFormat()

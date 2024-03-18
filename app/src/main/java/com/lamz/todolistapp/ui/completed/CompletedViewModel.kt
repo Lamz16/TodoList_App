@@ -18,7 +18,6 @@ class CompletedViewModel(private val repository: TodoRepository) : ViewModel() {
     val isLoading: LiveData<Boolean> get() = _isLoading
 
     fun fetchTodoList() {
-
         _isLoading.value = true
         viewModelScope.launch(Dispatchers.IO) {
             repository.getCompleteTodoList { todoList ->

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.lamz.todolistapp.DetailActivity
@@ -15,6 +16,7 @@ import com.lamz.todolistapp.TodoAdapter
 import com.lamz.todolistapp.data.TodoItem
 import com.lamz.todolistapp.databinding.FragmentCompletedBinding
 import com.lamz.todolistapp.utils.Utils
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CompletedFragment : Fragment() {
@@ -40,15 +42,12 @@ class CompletedFragment : Fragment() {
         val colorTeks = ContextCompat.getColor(requireContext(), R.color.white)
         binding.text1.setTextColor(colorTeks)
 
-        completedViewModel.fetchTodoList()
-        completedViewModel.todoList.observe(viewLifecycleOwner) {
-            if (it.isNotEmpty()){
-                updateUI(it)
-                val emptyBanner = binding.emptyBanner.root
-                emptyBanner.visibility = View.INVISIBLE
-            }else{
-                val emptyBanner = binding.emptyBanner.root
-                emptyBanner.visibility = View.VISIBLE
+        lifecycleScope.launch { completedViewModel.fetchTodoList() }
+        completedViewModel.todoList.observe(viewLifecycleOwner) { todoList ->
+            val emptyBanner = binding.emptyBanner.root
+            emptyBanner.visibility = if (todoList.isNotEmpty()) View.INVISIBLE else View.VISIBLE
+            if (todoList.isNotEmpty()) {
+                updateUI(todoList)
             }
         }
 

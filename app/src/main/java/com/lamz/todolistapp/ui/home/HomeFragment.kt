@@ -88,19 +88,16 @@ class HomeFragment : Fragment() {
             loadingProgressBar?.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
 
-
-        homeViewModel.fetchTodoList()
+        lifecycleScope.launch {
+            homeViewModel.fetchTodoList()
+        }
 
         homeViewModel.todoList.observe(viewLifecycleOwner) { todoList ->
-            if (todoList.isNotEmpty()){
+            val emptyBanner = binding.emptyBanner.root
+            emptyBanner.visibility = if (todoList.isNotEmpty()) View.INVISIBLE else View.VISIBLE
+            if (todoList.isNotEmpty()) {
                 updateUI(todoList)
-                val emptyBanner = binding.emptyBanner.root
-                emptyBanner.visibility = View.INVISIBLE
-            }else{
-                val emptyBanner = binding.emptyBanner.root
-                emptyBanner.visibility = View.VISIBLE
             }
-
 
             searchEditText.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(
@@ -112,7 +109,12 @@ class HomeFragment : Fragment() {
 
                 }
 
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                override fun onTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    before: Int,
+                    count: Int
+                ) {
 
                 }
 
@@ -133,6 +135,7 @@ class HomeFragment : Fragment() {
             })
 
         }
+
     }
 
     private fun showPopupMenu(view: View) {
@@ -143,10 +146,10 @@ class HomeFragment : Fragment() {
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.menu1 -> {
-                    lifecycleScope.launch(Dispatchers.IO){
+                    lifecycleScope.launch(Dispatchers.IO) {
                         googleSignInClient.signOut()
                         auth.signOut()
-                        withContext(Dispatchers.Main){
+                        withContext(Dispatchers.Main) {
                             val intent = Intent(requireContext(), LoginActivity::class.java)
                             startActivity(intent)
                             requireActivity().finish()
