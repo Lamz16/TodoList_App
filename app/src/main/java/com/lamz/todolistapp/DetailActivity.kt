@@ -2,14 +2,10 @@ package com.lamz.todolistapp
 
 import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -20,7 +16,7 @@ import com.google.firebase.database.ValueEventListener
 import com.lamz.todolistapp.data.InputTodo
 import com.lamz.todolistapp.data.TodoItem
 import com.lamz.todolistapp.databinding.ActivityDetailBinding
-import com.lamz.todolistapp.ui.home.HomeFragment
+import com.lamz.todolistapp.databinding.AlertDialogBinding
 import com.lamz.todolistapp.utils.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,14 +26,19 @@ class DetailActivity : AppCompatActivity() {
     private var auth = FirebaseAuth.getInstance()
     private lateinit var database: DatabaseReference
     private lateinit var todoId: String
+    private var _alertDialogBinding: AlertDialogBinding? = null
+    private val alertDialogBinding get() = _alertDialogBinding
+    private var isDialogShown = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val color = ContextCompat.getColor(this, R.color.color_2)
-        binding.container.setBackgroundColor(color)
+        if (savedInstanceState != null) {
+            isDialogShown = savedInstanceState.getBoolean("isDialogShown", false)
+        }
+
         todoId = intent.getStringExtra(toodoId) ?: ""
         lifecycleScope.launch(Dispatchers.IO) {
             database =
@@ -49,6 +50,9 @@ class DetailActivity : AppCompatActivity() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
                         val todo = snapshot.getValue(TodoItem::class.java)
+                        if (isDialogShown) {
+                            showAlertDialog(todo?.title, todo?.detail, todo?.status, todo?.completed, todo?.uid_completed)
+                        }
                         with(binding) {
                             titleDetail.text = todo?.title
                             bannerDetail.detailDate.text = getString(R.string.date, todo?.time)
@@ -75,37 +79,46 @@ class DetailActivity : AppCompatActivity() {
             })
         }
 
+    }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("isDialogShown", isDialogShown)
     }
 
     private fun showAlertDialog(title : String? , detail : String?, status : String?, isComplete : String?,uidCompleted : String?) {
+        isDialogShown = true
         val builder = AlertDialog.Builder(this)
-        val inflater = layoutInflater
-        val dialogView = inflater.inflate(R.layout.alert_dialog, null)
+        _alertDialogBinding = AlertDialogBinding.inflate(layoutInflater)
+        val view = alertDialogBinding?.root
+        alertDialogBinding?.apply {
+            val todo = titleInput
+            val detailTodo = taskInput
 
-        val todo = dialogView.findViewById<EditText>(R.id.title_input)
-        val detailTodo = dialogView.findViewById<EditText>(R.id.task_input)
-        val cancel = dialogView.findViewById<ImageView>(R.id.cancel)
-        val save = dialogView.findViewById<Button>(R.id.btnSave)
+            todo.setText(title)
+            detailTodo.setText(detail)
 
-        todo.setText(title)
-        detailTodo.setText(detail)
+            builder.setView(view)
+            val dialog = builder.create()
+            dialog.window?.setBackgroundDrawableResource(R.drawable.alert_dialog_bg)
+            dialog.show()
 
-        builder.setView(dialogView)
-        val dialog = builder.create()
-        dialog.window?.setBackgroundDrawableResource(R.drawable.alert_dialog_bg)
-        dialog.show()
-        cancel.setOnClickListener {
-            dialog.dismiss()
-        }
-        save.setOnClickListener {
-            updateTodo(todo.text.toString(), detailTodo.text.toString(),status, isComplete, uidCompleted,dialog )
+            cancel.setOnClickListener {
+                dialog.dismiss()
+                isDialogShown = false
+            }
+
+            btnSave.setOnClickListener {
+                updateTodo(todo.text.toString(), detailTodo.text.toString(),status, isComplete, uidCompleted,dialog )
+            }
         }
     }
 
+
+
     private fun updateTodo(todo : String, detail : String,status : String?, isComplete : String?,uidCompleted : String?, finish : AlertDialog){
         lifecycleScope.launch(Dispatchers.IO) {
-            database = Utils.firebaseDatabase.getReference(Utils.TODO)
+            database = Utils.firebaseDatabaseTodo
             val taskId = database.push().key!!
             val uid = auth.currentUser?.uid
             val currentTime = Utils.getCurrentTimeWithFormat()
