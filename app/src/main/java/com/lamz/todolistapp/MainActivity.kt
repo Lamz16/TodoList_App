@@ -17,13 +17,14 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var alertDialogBinding: AlertDialogBinding
+    private var _alertDialogBinding: AlertDialogBinding? = null
+    private val alertDialogBinding get() = _alertDialogBinding
     private val mainViewModel: MainViewModel by viewModel()
     private var isDialogShown = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        alertDialogBinding = AlertDialogBinding.inflate(layoutInflater)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -62,8 +63,8 @@ class MainActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean("isDialogShown", isDialogShown)
-        val todoInput = alertDialogBinding.titleInput.text.toString()
-        val detailInput = alertDialogBinding.taskInput.text.toString()
+        val todoInput = alertDialogBinding?.titleInput?.text.toString()
+        val detailInput = alertDialogBinding?.taskInput?.text.toString()
         outState.putString("todoInput", todoInput)
         outState.putString("detailInput", detailInput)
 
@@ -73,15 +74,16 @@ class MainActivity : AppCompatActivity() {
         super.onRestoreInstanceState(savedInstanceState)
         val saveTitle = savedInstanceState.getString("todoInput")
         val saveDetail = savedInstanceState.getString("detailInput")
-        alertDialogBinding.titleInput.setText(saveTitle)
-        alertDialogBinding.taskInput.setText(saveDetail)
+        alertDialogBinding?.titleInput?.setText(saveTitle)
+        alertDialogBinding?.taskInput?.setText(saveDetail)
     }
 
     private fun showAlertDialog() {
         isDialogShown = true
         val builder = AlertDialog.Builder(this)
-        val view = alertDialogBinding.root
-        alertDialogBinding.apply {
+        _alertDialogBinding = AlertDialogBinding.inflate(layoutInflater)
+        val view = alertDialogBinding?.root
+        alertDialogBinding?.apply {
             val todo = titleInput
             val detail = taskInput
 
@@ -93,6 +95,7 @@ class MainActivity : AppCompatActivity() {
 
             cancel.setOnClickListener {
                 dialog.dismiss()
+                isDialogShown = false
             }
 
             btnSave.setOnClickListener {
