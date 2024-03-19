@@ -41,10 +41,7 @@ class DetailActivity : AppCompatActivity() {
 
         todoId = intent.getStringExtra(toodoId) ?: ""
         lifecycleScope.launch(Dispatchers.IO) {
-            database =
-                FirebaseDatabase.getInstance("https://todolist-app-e056a-default-rtdb.firebaseio.com")
-                    .getReference("todo")
-
+            database = Utils.firebaseDatabaseTodo
             val taskRef = database.child(todoId)
             taskRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
