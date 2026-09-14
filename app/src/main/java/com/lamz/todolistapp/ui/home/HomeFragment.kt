@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -37,7 +36,6 @@ class HomeFragment : Fragment() {
     private lateinit var todoRepository: TodoRepository
     private lateinit var googleSignInClient: GoogleSignInClient
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -60,21 +58,13 @@ class HomeFragment : Fragment() {
             .build()
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
-        val colorTeks = ContextCompat.getColor(requireContext(), R.color.white)
-        binding.text1.setTextColor(colorTeks)
-
         val user = auth.currentUser
         if (user != null) {
             binding.text1.text = getString(R.string.welcome_back_main, user.displayName)
         }
 
         val searchEditText = binding.search
-
-
-        binding.homeMenu.setOnClickListener {
-            showPopupMenu(it)
-        }
-
+        binding.homeMenu.setOnClickListener { showPopupMenu(it) }
 
         binding.rvTodo.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -83,66 +73,36 @@ class HomeFragment : Fragment() {
         todoRepository = TodoRepository()
 
         val loadingProgressBar = binding.loadingProgressBar
-
         homeViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            loadingProgressBar?.visibility = if (isLoading) View.VISIBLE else View.GONE
+            loadingProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
 
-        lifecycleScope.launch {
-            homeViewModel.fetchTodoList()
-        }
+        lifecycleScope.launch { homeViewModel.fetchTodoList() }
 
         homeViewModel.todoList.observe(viewLifecycleOwner) { todoList ->
             val emptyBanner = binding.emptyBanner.root
             emptyBanner.visibility = if (todoList.isNotEmpty()) View.INVISIBLE else View.VISIBLE
-            if (todoList.isNotEmpty()) {
-                updateUI(todoList)
-            }
+            if (todoList.isNotEmpty()) updateUI(todoList)
 
             searchEditText.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {
-
-                }
-
-                override fun onTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    before: Int,
-                    count: Int
-                ) {
-
-                }
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
 
                 override fun afterTextChanged(s: Editable?) {
-
                     val query = s.toString().trim()
-
-
                     val filteredList = todoList.filter { todoItem ->
-                        todoItem.title.contains(
-                            query,
-                            ignoreCase = true
-                        ) || todoItem.detail.contains(query, ignoreCase = true)
+                        todoItem.title.contains(query, ignoreCase = true) ||
+                            todoItem.detail.contains(query, ignoreCase = true)
                     }
-
-                    updateUI(filteredList as ArrayList<TodoItem>)
+                    updateUI(ArrayList(filteredList))
                 }
             })
-
         }
-
     }
 
     private fun showPopupMenu(view: View) {
         val popupMenu = PopupMenu(requireContext(), view)
         popupMenu.menuInflater.inflate(R.menu.option_menu, popupMenu.menu)
-
-
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.menu1 -> {
@@ -150,29 +110,21 @@ class HomeFragment : Fragment() {
                         googleSignInClient.signOut()
                         auth.signOut()
                         withContext(Dispatchers.Main) {
-                            val intent = Intent(requireContext(), LoginActivity::class.java)
-                            startActivity(intent)
+                            startActivity(Intent(requireContext(), LoginActivity::class.java))
                             requireActivity().finish()
                         }
                     }
                     true
                 }
-
                 else -> false
             }
         }
-
         popupMenu.show()
     }
 
-
     private fun updateUI(todoList: ArrayList<TodoItem>) {
-
         val adapter = TodoAdapter(todoList)
-
-
         binding.rvTodo.adapter = adapter
-
         adapter.setOnItemClickListener(object : TodoAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
                 val clickedItem = todoList[position]
@@ -184,16 +136,13 @@ class HomeFragment : Fragment() {
             override fun onCheckboxChanged(position: Int, isChecked: Boolean) {
                 val uidCompleted = FirebaseAuth.getInstance().currentUser?.uid
                 val clickedItem = todoList[position]
-                val todoRef =
-                    Utils.firebaseDatabaseTodo.child(clickedItem.todoId)
+                val todoRef = Utils.firebaseDatabaseTodo.child(clickedItem.todoId)
                 todoRef.child(Utils.COMPLETED).setValue(if (isChecked) "yes" else "no")
-                todoRef.child(Utils.UID_COMPLETED)
-                    .setValue(if (isChecked) "${uidCompleted}_yes" else "")
+                todoRef.child(Utils.UID_COMPLETED).setValue(if (isChecked) "${uidCompleted}_yes" else "")
                 todoRef.child(Utils.STATUS).setValue(if (isChecked) "Complete" else "Incomplete")
             }
         })
     }
-
 
     companion object {
         const val TAG = "HomeFragment"
