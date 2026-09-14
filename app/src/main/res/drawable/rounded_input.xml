@@ -1,15 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_focused="true">
-        <shape>
-            <solid android:color="@color/color_3" />
-            <corners android:radius="8dp" />
+        <shape android:shape="rectangle">
+            <solid android:color="@color/paper" />
+            <stroke android:width="2dp" android:color="@color/forest" />
+            <corners android:radius="14dp" />
+            <padding android:left="14dp" android:top="12dp" android:right="14dp" android:bottom="12dp" />
         </shape>
     </item>
-    <!-- State default -->
     <item>
-        <shape>
-            <solid android:color="@color/color_3" />
-            <corners android:radius="8dp" />
+        <shape android:shape="rectangle">
+            <solid android:color="@color/paper" />
+            <stroke android:width="1dp" android:color="@color/divider_nature" />
+            <corners android:radius="14dp" />
+            <padding android:left="14dp" android:top="12dp" android:right="14dp" android:bottom="12dp" />
         </shape>
     </item>
 </selector>
