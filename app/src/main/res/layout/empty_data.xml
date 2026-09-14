@@ -3,20 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/corner_banner">
+    android:background="@drawable/corner_banner"
+    android:minHeight="140dp"
+    android:padding="24dp">
 
     <TextView
         android:id="@+id/emtpyText"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:fontFamily="@font/inter_semibold"
-        android:padding="24dp"
+        android:gravity="center"
         android:text="@string/data_is_empty"
-        android:textColor="@color/black"
+        android:textColor="@color/color_2"
+        android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
