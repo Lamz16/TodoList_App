@@ -1,28 +1,30 @@
 <resources>
-    <string name="app_name">TodoList App</string>
-    <string name="title_home">Home</string>
-    <string name="title_completed">Completed</string>
-    <string name="welcome_back">Welcome back!!</string>
+    <string name="app_name">Lamz Notes</string>
+    <string name="title_home">Notes</string>
+    <string name="title_completed">Archived</string>
+    <string name="welcome_back">Welcome back</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="login">Login</string>
     <string name="or_sign_in_with">or sign in with</string>
 
     <string name="sign_up">Don\'t have an account? Sign Up</string>
-    <string name="lets_go_started">lets go started!</string>
+    <string name="lets_go_started">Create your notes space</string>
     <string name="name">Name</string>
     <string name="register">Register</string>
     <string name="already_have_account_sign_in">Already have account? Sign in</string>
     <string name="title">Title</string>
-    <string name="task">Task</string>
-    <string name="save">Save</string>
-    <string name="search">Search</string>
-    <string name="titleDetail">TODODODODO</string>
-    <string name="welcome_back_main">Welcome back, %s</string>
-    <string name="all_todocompleted">All the to-dos you\'ve completed</string>
+    <string name="task">Write your note...</string>
+    <string name="save">Save Note</string>
+    <string name="search">Search notes</string>
+    <string name="titleDetail">Note Detail</string>
+    <string name="welcome_back_main">Your notes, %s</string>
+    <string name="all_todocompleted">Archived notes</string>
     <string name="default_web_client_id">none</string>
     <string name="logout">Sign Out</string>
-    <string name="date">Date : %s</string>
-    <string name="status">Status : %s</string>
-    <string name="data_is_empty">Todo is Empty</string>
+    <string name="date">Created: %s</string>
+    <string name="status">State: %s</string>
+    <string name="data_is_empty">No notes yet. Tap + to create your first note.</string>
+    <string name="notes_subtitle">Capture ideas, reminders, and anything worth remembering.</string>
+    <string name="archive_subtitle">Notes you have marked as completed are kept here.</string>
 </resources>
