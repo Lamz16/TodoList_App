@@ -74,7 +74,7 @@ class HomeFragment : Fragment() {
 
         val loadingProgressBar = binding.loadingProgressBar
         homeViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            loadingProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            loadingProgressBar?.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
 
         lifecycleScope.launch { homeViewModel.fetchTodoList() }

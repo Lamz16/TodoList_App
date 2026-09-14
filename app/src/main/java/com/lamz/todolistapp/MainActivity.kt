@@ -34,12 +34,12 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
         val navController = navHostFragment.navController
 
-        binding.btnNotes.setOnClickListener {
+        binding.btnNotes?.setOnClickListener {
             if (navController.currentDestination?.id != R.id.navigation_home) {
                 navController.navigate(R.id.navigation_home)
             }
         }
-        binding.btnArchive.setOnClickListener {
+        binding.btnArchive?.setOnClickListener {
             if (navController.currentDestination?.id != R.id.navigation_completed) {
                 navController.navigate(R.id.navigation_completed)
             }
@@ -60,10 +60,10 @@ class MainActivity : AppCompatActivity() {
         val selectedText = ContextCompat.getColor(this, R.color.white)
         val unselectedText = ContextCompat.getColor(this, R.color.text_secondary)
 
-        binding.btnNotes.backgroundTintList = ColorStateList.valueOf(if (notesSelected) selected else unselected)
-        binding.btnArchive.backgroundTintList = ColorStateList.valueOf(if (notesSelected) unselected else selected)
-        binding.btnNotes.setTextColor(if (notesSelected) selectedText else unselectedText)
-        binding.btnArchive.setTextColor(if (notesSelected) unselectedText else selectedText)
+        binding.btnNotes?.backgroundTintList = ColorStateList.valueOf(if (notesSelected) selected else unselected)
+        binding.btnArchive?.backgroundTintList = ColorStateList.valueOf(if (notesSelected) unselected else selected)
+        binding.btnNotes?.setTextColor(if (notesSelected) selectedText else unselectedText)
+        binding.btnArchive?.setTextColor(if (notesSelected) unselectedText else selectedText)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
