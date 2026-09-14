@@ -4,20 +4,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_3"
-    android:paddingStart="24dp"
-    android:paddingEnd="24dp"
+    android:background="@color/surface_nature"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
     tools:context=".ui.completed.CompletedFragment">
 
     <TextView
         android:id="@+id/text1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="24dp"
         android:fontFamily="@font/inter_semibold"
         android:text="@string/all_todocompleted"
-        android:textColor="@color/color_2"
-        android:textSize="26sp"
+        android:textColor="@color/text_primary"
+        android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -26,13 +26,13 @@
         android:id="@+id/archiveSubtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="6dp"
         android:text="@string/archive_subtitle"
-        android:textColor="#697386"
+        android:textColor="@color/text_secondary"
         android:textSize="13sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text1" />
+        app:layout_constraintTop_toBottomOf="@id/text1" />
 
     <ProgressBar
         android:id="@+id/loadingProgressBar"
@@ -42,19 +42,19 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/archiveSubtitle" />
+        app:layout_constraintTop_toBottomOf="@id/archiveSubtitle" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTodo"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="20dp"
         android:clipToPadding="false"
-        android:paddingBottom="24dp"
+        android:paddingBottom="96dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/archiveSubtitle"
+        app:layout_constraintTop_toBottomOf="@id/archiveSubtitle"
         tools:listitem="@layout/todo_items" />
 
     <include
@@ -62,10 +62,9 @@
         layout="@layout/empty_data"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="28dp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/archiveSubtitle" />
-
+        app:layout_constraintTop_toBottomOf="@id/archiveSubtitle" />
 </androidx.constraintlayout.widget.ConstraintLayout>
