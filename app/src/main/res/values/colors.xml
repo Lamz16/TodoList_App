@@ -4,12 +4,13 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
+    <color name="black">#FF171A1F</color>
     <color name="white">#FFFFFFFF</color>
-    
-    <color name="color_1">#FBA834</color>
-    <color name="color_2">#333A73</color>
-    <color name="color_3">#387ADF</color>
-    <color name="color_4">#50C4ED</color>
 
+    <!-- Warm, paper-inspired notes palette. Existing resource names are retained
+         so no Kotlin code or Firebase-backed data flow needs to change. -->
+    <color name="color_1">#FFF3C7</color>
+    <color name="color_2">#24324A</color>
+    <color name="color_3">#F8F6F1</color>
+    <color name="color_4">#E6A23C</color>
 </resources>
