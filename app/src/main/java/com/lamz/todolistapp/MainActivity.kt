@@ -1,14 +1,12 @@
 package com.lamz.todolistapp
 
-import android.graphics.Color
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.lamz.todolistapp.data.model.MainViewModel
 import com.lamz.todolistapp.databinding.ActivityMainBinding
 import com.lamz.todolistapp.databinding.AlertDialogBinding
@@ -24,58 +22,61 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         if (savedInstanceState != null) {
             isDialogShown = savedInstanceState.getBoolean("isDialogShown", false)
         }
+        if (isDialogShown) showAlertDialog()
 
-        if (isDialogShown) {
-            showAlertDialog()
-        }
-
-
-        val navView: BottomNavigationView = binding.navView
-
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
         val navController = navHostFragment.navController
-        navView.setBackgroundColor(Color.TRANSPARENT)
 
-
-        val indexes = listOf(1, 2)
-        indexes.forEach { index ->
-            navView.menu.getItem(index).isEnabled = false
+        binding.btnNotes.setOnClickListener {
+            if (navController.currentDestination?.id != R.id.navigation_home) {
+                navController.navigate(R.id.navigation_home)
+            }
         }
-        val color = ContextCompat.getColor(this, R.color.color_2)
-        binding.container.setBackgroundColor(color)
-
-        navView.setupWithNavController(navController)
-        binding.fab.setOnClickListener {
-            showAlertDialog()
+        binding.btnArchive.setOnClickListener {
+            if (navController.currentDestination?.id != R.id.navigation_completed) {
+                navController.navigate(R.id.navigation_completed)
+            }
         }
 
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            val notesSelected = destination.id == R.id.navigation_home
+            styleSwitcher(notesSelected)
+        }
 
+        binding.container.setBackgroundColor(ContextCompat.getColor(this, R.color.surface_nature))
+        binding.fab.setOnClickListener { showAlertDialog() }
+    }
+
+    private fun styleSwitcher(notesSelected: Boolean) {
+        val selected = ContextCompat.getColor(this, R.color.forest)
+        val unselected = ContextCompat.getColor(this, android.R.color.transparent)
+        val selectedText = ContextCompat.getColor(this, R.color.white)
+        val unselectedText = ContextCompat.getColor(this, R.color.text_secondary)
+
+        binding.btnNotes.backgroundTintList = ColorStateList.valueOf(if (notesSelected) selected else unselected)
+        binding.btnArchive.backgroundTintList = ColorStateList.valueOf(if (notesSelected) unselected else selected)
+        binding.btnNotes.setTextColor(if (notesSelected) selectedText else unselectedText)
+        binding.btnArchive.setTextColor(if (notesSelected) unselectedText else selectedText)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean("isDialogShown", isDialogShown)
-        val todoInput = alertDialogBinding?.titleInput?.text.toString()
-        val detailInput = alertDialogBinding?.taskInput?.text.toString()
-        outState.putString("todoInput", todoInput)
-        outState.putString("detailInput", detailInput)
-
+        outState.putString("todoInput", alertDialogBinding?.titleInput?.text.toString())
+        outState.putString("detailInput", alertDialogBinding?.taskInput?.text.toString())
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        val saveTitle = savedInstanceState.getString("todoInput")
-        val saveDetail = savedInstanceState.getString("detailInput")
-        alertDialogBinding?.titleInput?.setText(saveTitle)
-        alertDialogBinding?.taskInput?.setText(saveDetail)
+        alertDialogBinding?.titleInput?.setText(savedInstanceState.getString("todoInput"))
+        alertDialogBinding?.taskInput?.setText(savedInstanceState.getString("detailInput"))
     }
 
     private fun showAlertDialog() {
@@ -83,11 +84,10 @@ class MainActivity : AppCompatActivity() {
         val builder = AlertDialog.Builder(this)
         _alertDialogBinding = AlertDialogBinding.inflate(layoutInflater)
         val view = alertDialogBinding?.root
+
         alertDialogBinding?.apply {
             val todo = titleInput
             val detail = taskInput
-
-
             builder.setView(view)
             val dialog = builder.create()
             dialog.window?.setBackgroundDrawableResource(R.drawable.alert_dialog_bg)
@@ -97,28 +97,24 @@ class MainActivity : AppCompatActivity() {
                 dialog.dismiss()
                 isDialogShown = false
             }
-
             btnSave.setOnClickListener {
-                val currentTodoTitle = todo.text.toString()
-                val currentTodoDetail = detail.text.toString()
-                createTodo(currentTodoTitle, currentTodoDetail, dialog)
+                createTodo(todo.text.toString(), detail.text.toString(), dialog)
             }
         }
-
     }
 
     private fun createTodo(todo: String, detail: String, dialog: AlertDialog) {
         mainViewModel.createTodo(todo, detail)
         mainViewModel.createTodoSuccess.observe(this) { success ->
             if (success) {
-                Toast.makeText(this, "Success Create Task", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Note saved", Toast.LENGTH_SHORT).show()
                 dialog.dismiss()
+                isDialogShown = false
             } else {
-                Toast.makeText(this, "Failed to create task", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Failed to save note", Toast.LENGTH_SHORT).show()
                 dialog.dismiss()
+                isDialogShown = false
             }
         }
     }
-
-
 }
